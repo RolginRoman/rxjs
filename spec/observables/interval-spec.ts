@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { expectObservable } from '../helpers/marble-testing';
-import { NEVER, interval, asapScheduler, Observable, animationFrameScheduler, queueScheduler } from 'rxjs';
+import { NEVER, interval, asapScheduler, animationFrameScheduler, queueScheduler } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { take, concat } from 'rxjs/operators';
 import * as sinon from 'sinon';
@@ -63,7 +63,7 @@ describe('interval', () => {
   });
 
   it('should create an observable emitting periodically with the AsapScheduler', (done: MochaDone) => {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     const fakeTimer = sandbox.useFakeTimers();
     const period = 10;
     const events = [0, 1, 2, 3, 4, 5];
@@ -90,7 +90,7 @@ describe('interval', () => {
   });
 
   it('should create an observable emitting periodically with the QueueScheduler', (done: MochaDone) => {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     const fakeTimer = sandbox.useFakeTimers();
     const period = 10;
     const events = [0, 1, 2, 3, 4, 5];
@@ -117,7 +117,7 @@ describe('interval', () => {
   });
 
   it('should create an observable emitting periodically with the AnimationFrameScheduler', (done: MochaDone) => {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     const fakeTimer = sandbox.useFakeTimers();
     const period = 10;
     const events = [0, 1, 2, 3, 4, 5];

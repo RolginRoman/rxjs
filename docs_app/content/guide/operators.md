@@ -82,7 +82,7 @@ const fileObservable = urlObservable.pipe(
 );
 ```
 
-`http.get()` returns an Observable (of string or string arrays probably) for each individual URL.  Now you have an Observables *of* Observables, a higher-order Observable.
+`http.get()` returns an Observable (of string or string arrays probably) for each individual URL.  Now you have an Observable *of* Observables, a higher-order Observable.
 
 But how do you work with a higher-order Observable? Typically, by _flattening_: by (somehow) converting a higher-order Observable into an ordinary Observable.  For example:
 
@@ -146,6 +146,7 @@ These are Observable creation operators that also have join functionality -- emi
 - [`concat`](/api/index/function/concat)
 - [`forkJoin`](/api/index/function/forkJoin)
 - [`merge`](/api/index/function/merge)
+- [`partition`](/api/index/function/partition)
 - [`race`](/api/index/function/race)
 - [`zip`](/api/index/function/zip)
 
@@ -215,6 +216,7 @@ Also see the [Join Creation Operators](#join-creation-operators) section above.
 - [`concatAll`](/api/operators/concatAll)
 - [`exhaust`](/api/operators/exhaust)
 - [`mergeAll`](/api/operators/mergeAll)
+- [`switchAll`](/api/operators/switchAll)
 - [`startWith`](/api/operators/startWith)
 - [`withLatestFrom`](/api/operators/withLatestFrom)
 
@@ -265,7 +267,7 @@ Also see the [Join Creation Operators](#join-creation-operators) section above.
 
 
 
-## Creating custom observables
+## Creating custom operators
 
 ### Use the `pipe()` function to make new operators
 
@@ -275,7 +277,7 @@ For example, you could make a function that discarded odd values and doubled eve
 
 ```ts
 import { pipe } from 'rxjs';
-import { filter, map } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 
 function discardOddDoubleEven() {
   return pipe(

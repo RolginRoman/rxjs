@@ -55,8 +55,7 @@ import { MonoTypeOperatorFunction, PartialObserver, SchedulerAction, SchedulerLi
  * @return {Observable<T>} Observable that emits the same notifications as the source Observable,
  * but with provided scheduler.
  *
- * @method observeOn
- * @owner Observable
+ * @name observeOn
  */
 export function observeOn<T>(scheduler: SchedulerLike, delay: number = 0): MonoTypeOperatorFunction<T> {
   return function observeOnOperatorFunction(source: Observable<T>): Observable<T> {
@@ -95,7 +94,7 @@ export class ObserveOnSubscriber<T> extends Subscriber<T> {
   private scheduleMessage(notification: Notification<any>): void {
     const destination = this.destination as Subscription;
     destination.add(this.scheduler.schedule(
-      ObserveOnSubscriber.dispatch,
+      ObserveOnSubscriber.dispatch as any,
       this.delay,
       new ObserveOnMessage(notification, this.destination)
     ));

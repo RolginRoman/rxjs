@@ -97,9 +97,9 @@ export function merge<T, R>(...observables: (ObservableInput<any> | SchedulerLik
  * // - First timer1 and timer2 will run concurrently
  * // - timer1 will emit a value every 1000ms for 10 iterations
  * // - timer2 will emit a value every 2000ms for 6 iterations
- * // - after timer1 hits it's max iteration, timer2 will
+ * // - after timer1 hits its max iteration, timer2 will
  * //   continue, and timer3 will start to run concurrently with timer2
- * // - when timer2 hits it's max iteration it terminates, and
+ * // - when timer2 hits its max iteration it terminates, and
  * //   timer3 will continue to emit a value every 500ms until it is complete
  * ```
  *
@@ -109,7 +109,7 @@ export function merge<T, R>(...observables: (ObservableInput<any> | SchedulerLik
  * @see {@link mergeScan}
  *
  * @param {...ObservableInput} observables Input Observables to merge together.
- * @param {number} [concurrent=Number.POSITIVE_INFINITY] Maximum number of input
+ * @param {number} [concurrent=Infinity] Maximum number of input
  * Observables being subscribed to concurrently.
  * @param {SchedulerLike} [scheduler=null] The {@link SchedulerLike} to use for managing
  * concurrency of input Observables.
@@ -119,9 +119,9 @@ export function merge<T, R>(...observables: (ObservableInput<any> | SchedulerLik
  * @name merge
  * @owner Observable
  */
-export function merge<T, R>(...observables: Array<ObservableInput<any> | SchedulerLike | number>): Observable<R> {
- let concurrent = Number.POSITIVE_INFINITY;
- let scheduler: SchedulerLike = null;
+export function merge<T, R>(...observables: Array<ObservableInput<any> | SchedulerLike | number | undefined>): Observable<R> {
+ let concurrent = Infinity;
+ let scheduler: SchedulerLike | undefined = undefined;
   let last: any = observables[observables.length - 1];
   if (isScheduler(last)) {
     scheduler = <SchedulerLike>observables.pop();
@@ -132,7 +132,7 @@ export function merge<T, R>(...observables: Array<ObservableInput<any> | Schedul
     concurrent = <number>observables.pop();
   }
 
-  if (scheduler === null && observables.length === 1 && observables[0] instanceof Observable) {
+  if (!scheduler && observables.length === 1 && observables[0] instanceof Observable) {
     return <Observable<R>>observables[0];
   }
 

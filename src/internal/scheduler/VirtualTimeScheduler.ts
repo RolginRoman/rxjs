@@ -30,7 +30,7 @@ export class VirtualTimeScheduler extends AsyncScheduler {
    * @param maxFrames The maximum number of frames to process before stopping. Used to prevent endless flush cycles.
    */
   constructor(SchedulerAction: typeof AsyncAction = VirtualAction as any,
-              public maxFrames: number = Number.POSITIVE_INFINITY) {
+              public maxFrames: number = Infinity) {
     super(SchedulerAction, () => this.frame);
   }
 
@@ -42,7 +42,7 @@ export class VirtualTimeScheduler extends AsyncScheduler {
   public flush(): void {
 
     const {actions, maxFrames} = this;
-    let error: any, action: AsyncAction<any>;
+    let error: any, action: AsyncAction<any> | undefined;
 
     while ((action = actions[0]) && action.delay <= maxFrames) {
       actions.shift();

@@ -63,7 +63,7 @@ describe('from', () => {
   });
 
   const fakeArrayObservable = <T>(...values: T[]) => {
-    let arr = ['bad array!'];
+    let arr: any = ['bad array!'];
     arr[observable] = () =>  {
       return {
         subscribe: (observer: Observer<T>) => {
@@ -102,6 +102,34 @@ describe('from', () => {
     { name: 'arguments', value: getArguments('x') },
   ];
 
+  if (Symbol && Symbol.asyncIterator) {
+    const fakeAsyncIterator = (...values: any[]) => {
+      return {
+        [Symbol.asyncIterator]() {
+          let i = 0;
+          return {
+            next() {
+              const index = i++;
+              if (index < values.length) {
+                return Promise.resolve({ done: false, value: values[index] });
+              } else {
+                return Promise.resolve({ done: true });
+              }
+            },
+            [Symbol.asyncIterator]() {
+              return this;
+            }
+          };
+        }
+      };
+    };
+
+    sources.push({
+      name: 'async-iterator',
+      value: fakeAsyncIterator('x')
+    });
+  }
+
   for (const source of sources) {
     it(`should accept ${source.name}`, (done) => {
       let nextInvoked = false;
@@ -139,8 +167,8 @@ describe('from', () => {
       expect(nextInvoked).to.equal(false);
     });
     it(`should accept a function`, (done) => {
-      const subject = new Subject();
-      const handler = (...args: any[]) => subject.next(...args);
+      const subject = new Subject<any>();
+      const handler: any = (arg: any) => subject.next(arg);
       handler[observable] = () => subject;
       let nextInvoked = false;
 

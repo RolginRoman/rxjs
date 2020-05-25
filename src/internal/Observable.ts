@@ -9,6 +9,7 @@ import { throwError } from './observable/throwError';
 import { observable as Symbol_observable } from './symbol/observable';
 import { pipeFromArray } from './util/pipe';
 import { config } from './config';
+import { asyncIteratorFrom } from './asyncIteratorFrom';
 
 /**
  * A representation of any set of values over any amount of time. This is the most basic building block
@@ -22,10 +23,10 @@ export class Observable<T> implements Subscribable<T> {
   public _isScalar: boolean = false;
 
   /** @deprecated This is an internal implementation detail, do not use. */
-  source: Observable<any>;
+  source: Observable<any> | undefined;
 
   /** @deprecated This is an internal implementation detail, do not use. */
-  operator: Operator<any, T>;
+  operator: Operator<any, T> | undefined;
 
   /**
    * @constructor
@@ -63,7 +64,7 @@ export class Observable<T> implements Subscribable<T> {
    * @param {Operator} operator the operator defining the operation to take on the observable
    * @return {Observable} a new observable with the Operator applied
    */
-  lift<R>(operator: Operator<T, R>): Observable<R> {
+  lift<R>(operator?: Operator<T, R>): Observable<R> {
     const observable = new Observable<R>();
     observable.source = this;
     observable.operator = operator;
@@ -203,9 +204,9 @@ export class Observable<T> implements Subscribable<T> {
    * @return {ISubscription} a subscription reference to the registered handlers
    * @method subscribe
    */
-  subscribe(observerOrNext?: PartialObserver<T> | ((value: T) => void),
-            error?: (error: any) => void,
-            complete?: () => void): Subscription {
+  subscribe(observerOrNext?: PartialObserver<T> | ((value: T) => void) | null,
+            error?: ((error: any) => void) | null,
+            complete?: (() => void) | null): Subscription {
 
     const { operator } = this;
     const sink = toSubscriber(observerOrNext, error, complete);
@@ -347,28 +348,29 @@ export class Observable<T> implements Subscribable<T> {
   }
 
   /* tslint:disable:max-line-length */
-  toPromise<T>(this: Observable<T>): Promise<T>;
-  toPromise<T>(this: Observable<T>, PromiseCtor: typeof Promise): Promise<T>;
-  toPromise<T>(this: Observable<T>, PromiseCtor: PromiseConstructorLike): Promise<T>;
+  toPromise<T>(this: Observable<T>): Promise<T | undefined>;
+  toPromise<T>(this: Observable<T>, PromiseCtor: typeof Promise): Promise<T | undefined>;
+  toPromise<T>(this: Observable<T>, PromiseCtor: PromiseConstructorLike): Promise<T | undefined>;
   /* tslint:enable:max-line-length */
 
   /**
    * Subscribe to this Observable and get a Promise resolving on
-   * `complete` with the last emission.
+   * `complete` with the last emission (if any).
    *
    * @method toPromise
    * @param [promiseCtor] a constructor function used to instantiate
    * the Promise
    * @return A Promise that resolves with the last value emit, or
-   * rejects on an error.
+   * rejects on an error. If there were no emissions, Promise
+   * resolves with undefined.
    */
-  toPromise(promiseCtor?: PromiseConstructorLike): Promise<T> {
+  toPromise(promiseCtor?: PromiseConstructorLike): Promise<T | undefined> {
     promiseCtor = getPromiseCtor(promiseCtor);
 
     return new promiseCtor((resolve, reject) => {
-      let value: any;
+      let value: T | undefined;
       this.subscribe((x: T) => value = x, (err: any) => reject(err), () => resolve(value));
-    }) as Promise<T>;
+    }) as Promise<T | undefined>;
   }
 }
 
@@ -390,3 +392,24 @@ function getPromiseCtor(promiseCtor: PromiseConstructorLike | undefined) {
 
   return promiseCtor;
 }
+
+export interface Observable<T> {
+  [Symbol.asyncIterator](): AsyncIterableIterator<T>;
+}
+
+(function () {
+  /**
+   * We only add this symbol if the runtime supports it.
+   * Adding this adds support for subscribing to observables
+   * via `for await(const value of source$) {}`
+   *
+   * This passes muster in Node 9, which does not support
+   * async iterators. As well as working in Node 12, which does
+   * support the symbol.
+   */
+  if (Symbol && Symbol.asyncIterator) {
+    Observable.prototype[Symbol.asyncIterator] = function () {
+      return asyncIteratorFrom(this);
+    };
+  }
+})();

@@ -40,15 +40,14 @@ import { ObservableInput, OperatorFunction } from '../types';
  * @param {function(acc: R, value: T): Observable<R>} accumulator
  * The accumulator function called on each source value.
  * @param seed The initial accumulation value.
- * @param {number} [concurrent=Number.POSITIVE_INFINITY] Maximum number of
+ * @param {number} [concurrent=Infinity] Maximum number of
  * input Observables being subscribed to concurrently.
  * @return {Observable<R>} An observable of the accumulated values.
- * @method mergeScan
- * @owner Observable
+ * @name mergeScan
  */
 export function mergeScan<T, R>(accumulator: (acc: R, value: T, index: number) => ObservableInput<R>,
                                 seed: R,
-                                concurrent: number = Number.POSITIVE_INFINITY): OperatorFunction<T, R> {
+                                concurrent: number = Infinity): OperatorFunction<T, R> {
   return (source: Observable<T>) => source.lift(new MergeScanOperator(accumulator, seed, concurrent));
 }
 
@@ -106,13 +105,7 @@ export class MergeScanSubscriber<T, R> extends OuterSubscriber<T, R> {
     const innerSubscriber = new InnerSubscriber(this, value, index);
     const destination = this.destination as Subscription;
     destination.add(innerSubscriber);
-    const innerSubscription = subscribeToResult<T, R>(this, ish, undefined, undefined, innerSubscriber);
-    // The returned subscription will usually be the subscriber that was
-    // passed. However, interop subscribers will be wrapped and for
-    // unsubscriptions to chain correctly, the wrapper needs to be added, too.
-    if (innerSubscription !== innerSubscriber) {
-      destination.add(innerSubscription);
-    }
+    subscribeToResult<T, R>(this, ish, undefined, undefined, innerSubscriber);
   }
 
   protected _complete(): void {

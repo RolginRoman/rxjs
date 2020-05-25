@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { hot, cold, expectObservable, expectSubscriptions } from '../helpers/marble-testing';
-import { EMPTY, NEVER, of, race as staticRace, timer, defer, Observable, throwError } from 'rxjs';
+import { EMPTY, NEVER, of, timer, defer, Observable, throwError } from 'rxjs';
 import { race, mergeMap, map, finalize, startWith } from 'rxjs/operators';
 
 /** @test {race} */
@@ -168,7 +168,7 @@ describe('race operator', () => {
     const e1 = of(true);
     const e2 = timer(200).pipe(map(_ => false));
 
-    staticRace(e1, e2).subscribe(x => {
+    e1.pipe(race(e2)).subscribe(x => {
       expect(x).to.be.true;
     }, done, done);
   });

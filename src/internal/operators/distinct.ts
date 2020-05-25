@@ -71,8 +71,7 @@ import { MonoTypeOperatorFunction, TeardownLogic } from '../types';
  * @param {function} [keySelector] Optional function to select which value you want to check as distinct.
  * @param {Observable} [flushes] Optional Observable for flushing the internal HashSet of the operator.
  * @return {Observable} An Observable that emits items from the source Observable with distinct values.
- * @method distinct
- * @owner Observable
+ * @name distinct
  */
 export function distinct<T, K>(keySelector?: (value: T) => K,
                                flushes?: Observable<any>): MonoTypeOperatorFunction<T> {
@@ -80,7 +79,7 @@ export function distinct<T, K>(keySelector?: (value: T) => K,
 }
 
 class DistinctOperator<T, K> implements Operator<T, T> {
-  constructor(private keySelector: (value: T) => K, private flushes: Observable<any>) {
+  constructor(private keySelector?: (value: T) => K, private flushes?: Observable<any>) {
   }
 
   call(subscriber: Subscriber<T>, source: any): TeardownLogic {
@@ -96,7 +95,7 @@ class DistinctOperator<T, K> implements Operator<T, T> {
 export class DistinctSubscriber<T, K> extends OuterSubscriber<T, T> {
   private values = new Set<K>();
 
-  constructor(destination: Subscriber<T>, private keySelector: (value: T) => K, flushes: Observable<any>) {
+  constructor(destination: Subscriber<T>, private keySelector?: (value: T) => K, flushes?: Observable<any>) {
     super(destination);
 
     if (flushes) {
@@ -126,7 +125,7 @@ export class DistinctSubscriber<T, K> extends OuterSubscriber<T, T> {
     let key: K;
     const { destination } = this;
     try {
-      key = this.keySelector(value);
+      key = this.keySelector!(value);
     } catch (err) {
       destination.error(err);
       return;

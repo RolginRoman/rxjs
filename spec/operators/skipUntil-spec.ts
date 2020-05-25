@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { hot, cold, expectObservable, expectSubscriptions } from '../helpers/marble-testing';
-import { concat, defer, Observable, of, Subject } from 'rxjs';
+import { concat, defer, of, Subject } from 'rxjs';
 import { skipUntil, mergeMap } from 'rxjs/operators';
 import { asInteropObservable } from '../helpers/interop-helper';
 
@@ -247,7 +247,7 @@ describe('skipUntil', () => {
     const e1 =   hot( '--a--b--c--d--e--|');
     const e1subs =   ['^                !',
                       '^                !']; // for the explicit subscribe some lines below
-    const skip = new Subject();
+    const skip = new Subject<string>();
     const expected =  '-----------------|';
 
     e1.subscribe((x: string) => {
